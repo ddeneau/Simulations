@@ -24,11 +24,11 @@ def adjust_coordinates(body):
 
 class Mechanics:
 
-    def __init__(self):
-        self.semi_major = 200  # The semi-major axis
-        self.semi_minor = 150  # The semi-minor axis
-        self.focus = 225  # Focus of ellipse
-        self.eccentricity = 0.2
+    def __init__(self, semi_major, semi_minor, focus, eccentricity):
+        self.semi_major = semi_major   # The semi-major axis
+        self.semi_minor = semi_minor  # The semi-minor axis
+        self.focus = focus  # Focus of ellipse
+        self.eccentricity = eccentricity
         self.theta = 0.01  # Angle between radius and x-axis
         self.phi = 0.01  # Angle between radius, from focus, and x-axis
         self.star = Body(100, 45, int(WIDTH / 2), int(HEIGHT / 2))  # main star (mass, radius)
@@ -130,5 +130,5 @@ class Body:
 
 
 # Runs program.
-m = Mechanics()
+m = Mechanics(400, 200, 175, 0.5)
 m.init_graphics()
