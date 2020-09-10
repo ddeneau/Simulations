@@ -5,10 +5,10 @@ import numpy
 import scipy.constants
 import pygame
 import random
-WIDTH = 1200
+WIDTH = 1400
 HEIGHT = 800
 MINIMUM_ECCENTRICITY, MAXIMUM_ECCENTRICITY = 1, 10
-MINIMUM_MASS, MAXIMUM_MASS = 25, 50
+MINIMUM_MASS, MAXIMUM_MASS = 5, 20
 MINIMUM_BODIES, MAXIMUM_BODIES = 1, 6
 
 
@@ -32,9 +32,9 @@ def adjust_coordinates(body):
 class Mechanics:
 
     def __init__(self, semi_major, semi_minor, focus):
-        self.semi_major = semi_major   # The semi-major axis
-        self.semi_minor = semi_minor  # The semi-minor axis
-        self.focus = focus  # Focus of ellipse
+        self.semi_major = semi_major   # The semi-major axis (Of the one star)
+        self.semi_minor = semi_minor  # The semi-minor axis (Of the one star)
+        self.focus = focus  # Focus of ellipse (Of the one star)
         self.star = Body(50, 25, int(WIDTH / 2), int(HEIGHT / 2), 0, 0, 0)  # main star (mass, radius)
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))  # Making of the screen
         self.bodies = list()  # List of the stuff to be simulated.
@@ -44,18 +44,18 @@ class Mechanics:
     def generate_bodies(self):
         for i in range(random.randint(MINIMUM_BODIES, MAXIMUM_BODIES)):
             mass = random.randint(MINIMUM_MASS, MAXIMUM_MASS)
-            x = int(WIDTH / random.randint(MAXIMUM_MASS, MAXIMUM_MASS))
-            y = int(HEIGHT / random.randint(MAXIMUM_MASS, MAXIMUM_MASS))
-            radius = mass 
+            x = random.randint(200, 500)
+            y = random.randint(50, 250)
+            radius = mass
             e = random.randrange(MINIMUM_ECCENTRICITY, MAXIMUM_ECCENTRICITY) / 1000
+            theta = random.randrange(1, 5)
             offset = i / 100
-            self.bodies.append(Body(mass, radius, x, y, e, e + offset, e + offset))
+            self.bodies.append(Body(mass, radius, x, y, e, theta, e + offset))
 
     # Updates alpha with new angular acceleration.
     def compute_force(self, body):
         mass = self.star.mass
-        r_squared = numpy.power(body.distance, 2)
-
+        r_squared = body.distance**2
         body.alpha = scipy.constants.gravitational_constant * mass / r_squared
 
     # Calculates new angular velocity
@@ -64,8 +64,9 @@ class Mechanics:
 
     # Update x and y values of planet based off of Kepler's Law's
     def compute_radial_vector(self, body):
-        x = (self.semi_major * numpy.cos(body.theta)) - body.eccentricity
-        y = (self.semi_major * numpy.sin(body.theta) * (1 - numpy.power(body.eccentricity, 2)))
+        # semi_major/distance
+        x = (body.distance * numpy.cos(body.theta)) - body.eccentricity
+        y = (body.distance * numpy.sin(body.theta) * (1 - numpy.power(body.eccentricity, 2)))
 
         body.update_state(x, y, body.theta, body.omega)
 
@@ -73,11 +74,11 @@ class Mechanics:
     def run_simulation_frame(self):
         for body in self.bodies:
             self.screen.fill((100, 100, 100))  # Reset the screen to black so object renders do not compound per frame.
-            body.check_angle()  # Make sure no angle exceeds 2pi rads.
             self.compute_force(body)  # Force and angular acceleration equation.
             self.compute_angular_velocity(body)  # Angular velocity equation.
             self.compute_radial_vector(body)  # Updates x and y positions.
             body.update_angle()  # Increments angle to move time forward.
+            body.check_angle()  # Make sure no angle exceeds 2pi rads.
 
     # Coordinate adjustment to fit with pygame coordinate scheme.
 
@@ -133,14 +134,14 @@ class Body:
     def __init__(self, mass, radius, x, y, eccentricity, theta, phi):
         self.mass = mass  # Mass of body.
         self.radius = radius  # Radius of body
-        self.distance = numpy.sqrt(x**2 + y**2) + random.randint(10, 100)
         self.x = x  # x coordinate
         self.y = y  # y coordinate
         self.omega = 0  # Angular velocity
         self.alpha = 0  # Angular acceleration
-        self.theta = theta  # Angle between radius and x-axis
+        self.theta = theta  # Angle between distance from star and x-axis
         self.phi = phi  # Angle between radius, from focus, and x-axis
         self.eccentricity = eccentricity  # Deviation from circular orbit.
+        self.distance = int(numpy.sqrt(x ** 2 + y ** 2))  # Radial distance from star.
 
     # Change state of body based on parameters.
     def update_state(self, x, y, alpha, omega):
@@ -148,7 +149,7 @@ class Body:
         self.y = y
         self.alpha = alpha
         self.omega = omega
-        print(x, y, self.eccentricity)
+        print({"x": x}, {"y": y}, self.eccentricity)
 
     # Keeps us between 0 and 2Pi
     def check_angle(self):
@@ -166,3 +167,4 @@ class Body:
 # Runs program.
 m = Mechanics(200, 150, 100)
 m.init_graphics()
+
