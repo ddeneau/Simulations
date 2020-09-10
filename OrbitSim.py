@@ -10,6 +10,8 @@ HEIGHT = 800
 MINIMUM_ECCENTRICITY, MAXIMUM_ECCENTRICITY = 1, 10
 MINIMUM_MASS, MAXIMUM_MASS = 5, 20
 MINIMUM_BODIES, MAXIMUM_BODIES = 1, 6
+LOWER_X_BOUNDARY, UPPER_X_BOUNDARY = 150, 450
+LOWER_Y_BOUNDARY, UPPER_Y_BOUNDARY = 50, 250
 
 
 # Simulation state changes. Keeps objects within bounds.
@@ -44,8 +46,8 @@ class Mechanics:
     def generate_bodies(self):
         for i in range(random.randint(MINIMUM_BODIES, MAXIMUM_BODIES)):
             mass = random.randint(MINIMUM_MASS, MAXIMUM_MASS)
-            x = random.randint(200, 500)
-            y = random.randint(50, 250)
+            x = random.randint(LOWER_X_BOUNDARY, UPPER_X_BOUNDARY)
+            y = random.randint(LOWER_Y_BOUNDARY, UPPER_Y_BOUNDARY)
             radius = mass
             e = random.randrange(MINIMUM_ECCENTRICITY, MAXIMUM_ECCENTRICITY) / 1000
             theta = random.randrange(1, 5)
